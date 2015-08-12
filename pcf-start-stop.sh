@@ -1,4 +1,5 @@
 #!/bin/bash
+# Set for 1.5.x Jobs
 
 export BUNDLE_GEMFILE=/home/tempest-web/tempest/web/bosh.Gemfile
 if [ $1 == "shut" -o $1 == "start" ];
@@ -11,6 +12,7 @@ fi
 
 declare -a bootOrder=(
 nats
+consule_server
 etcd_server
 nfs_server
 ccdb
@@ -23,7 +25,6 @@ health_manager
 clock_global
 cloud_controller_worker
 uaa
-login
 mysql_proxy
 mysql
 dea
