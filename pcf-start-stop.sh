@@ -28,6 +28,9 @@ uaa
 mysql_proxy
 mysql
 dea
+diego_brain
+diego_cell
+diego_database
 doppler
 loggregator_trafficcontroller
 )
