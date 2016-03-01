@@ -1,5 +1,5 @@
 #!/bin/bash
-# Set for 1.5.x Jobs
+# Updated for 1.6 with workaround for nfs_mounter
 
 export BUNDLE_GEMFILE=/home/tempest-web/tempest/web/bosh.Gemfile
 if [ $1 == "shut" -o $1 == "start" ];
@@ -10,35 +10,18 @@ if [ $1 == "shut" -o $1 == "start" ];
                 exit 1
 fi
 
+
+# These must be explicitly stopped due to nfs_mounter blocking as of 1.6.17
 declare -a bootOrder=(
-nats
-consule_server
-etcd_server
-nfs_server
-ccdb
-uaadb
-consoledb
 cloud_controller
-ha_proxy
-router
-health_manager
 clock_global
 cloud_controller_worker
-uaa
-mysql_proxy
-mysql
-dea
-diego_brain
-diego_cell
-diego_database
-doppler
-loggregator_trafficcontroller
 )
 
 
 if [ $1 == "shut" ]; then
- jobVMs=$(bundle exec bosh vms --detail|grep partition| awk -F '|' '{ print $2 }')
- bundle exec bosh vm resurrection disable
+ jobVMs=$(bosh vms --detail|grep partition| awk -F '|' '{ print $2 }')
+ bosh vm resurrection disable
  for (( i=${#bootOrder[@]}-1; i>=0; i-- )); do
         for x in $jobVMs; do
                 jobId=$(echo $x | awk -F "/" '{ print $1 }')
@@ -47,29 +30,17 @@ if [ $1 == "shut" ]; then
                         if [ "$jobType" == "${bootOrder[$i]}" ];
                         then
                                 #echo MATCHVAL---${bootOrder[$i]} JOBTYPE----$jobType JOBID----$jobId Instance-------$instanceId
-                                bundle exec bosh -n stop $jobId $instanceId --hard
+                                bosh -n stop $jobId --hard
                         fi
         done;
 
  done
+ bosh -n stop --hard
 fi
 
 
 if [ $1 == "start" ]; then
- startJobVMs=$(bundle exec bosh vms --detail|grep partition| awk -F '|' '{ print $4 }')
- bundle exec bosh vm resurrection enable
- for x in ${bootOrder[@]}; do
-        for i in $startJobVMs; do
-                jobString=$i
-                jobPart=$(echo $jobString | awk -F "-" '{ print $3 }')
-                jobType=$(echo $jobString | awk -F "-" '{ print $1 }')
-                 if [ "$x" == "$jobType" ];
-                 then
-                        #echo FOUND $jobString
-                        bundle exec bosh -n start $jobString
-                 fi
-        done;
- done
+ bosh -n start
 fi
 
 
