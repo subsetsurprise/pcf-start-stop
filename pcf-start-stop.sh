@@ -1,7 +1,14 @@
 #!/bin/bash
 # Updated for 1.6 with workaround for nfs_mounter
+# Updated for 1.7 new Gemfile location
 
-export BUNDLE_GEMFILE=/home/tempest-web/tempest/web/bosh.Gemfile
+if [ -f /home/tempest-web/tempest/web/vendor/bosh/Gemfile ];
+then
+  export BUNDLE_GEMFILE=/home/tempest-web/tempest/web/vendor/bosh/Gemfile
+else
+  export BUNDLE_GEMFILE=/home/tempest-web/tempest/web/bosh.Gemfile
+fi
+
 if [ $1 == "shut" -o $1 == "start" ];
         then
                 echo "Running PCF $1 Process..."
@@ -20,8 +27,8 @@ cloud_controller_worker
 
 
 if [ $1 == "shut" ]; then
- jobVMs=$(bosh vms --detail|grep partition| awk -F '|' '{ print $2 }')
- bosh vm resurrection disable
+ jobVMs=$(bundle exec bosh vms --detail|grep partition| awk -F '|' '{ print $2 }')
+ bundle exec bosh vm resurrection off
  for (( i=${#bootOrder[@]}-1; i>=0; i-- )); do
         for x in $jobVMs; do
                 jobId=$(echo $x | awk -F "/" '{ print $1 }')
@@ -30,17 +37,17 @@ if [ $1 == "shut" ]; then
                         if [ "$jobType" == "${bootOrder[$i]}" ];
                         then
                                 #echo MATCHVAL---${bootOrder[$i]} JOBTYPE----$jobType JOBID----$jobId Instance-------$instanceId
-                                bosh -n stop $jobId --hard
+                                bundle exec bosh -n stop $jobId --hard
                         fi
         done;
 
  done
- bosh -n stop --hard
+ bundle exec bosh -n stop --hard
 fi
 
 
 if [ $1 == "start" ]; then
- bosh -n start
+ bundle exec bosh -n start
+ bundle exec bosh vm resurrection on
 fi
-
 
