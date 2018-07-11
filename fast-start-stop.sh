@@ -10,7 +10,7 @@ if [[ ($1 == "shut") || ($1 == "start" ) || ($1 == "shutall") ]]
 fi
 
 deleteVMs() {
- bosh vm resurrection off
+ bundle exec bosh vm resurrection off
   for x in $jobVMs; do
      jobId=$(echo $x | awk -F "/" '{ print $1 }')
      instanceId=$(echo $x | awk -F "/" '{ print $2 }'| awk -F '(' '{ print $1 }')
@@ -19,25 +19,25 @@ deleteVMs() {
      fi
      jobVMID=$(echo $x | awk -F ',' '{ print $2 }')
        echo Killing: $jobId
-       bosh -n -N delete vm $jobVMID
+       bundle exec bosh -n -N delete vm $jobVMID
    done
-   echo "Kill VM tasks scheduled, execing 'watch bosh tasks --no-filter' to track progress"
-   watch bosh tasks --no-filter
+   echo "Kill VM tasks scheduled, execing 'watch bundle exec bosh tasks --no-filter' to track progress"
+   watch bundle exec bosh tasks --no-filter
 }
 
 if [ $1 == "shutall" ]; then
- jobVMs=$(bosh vms --details| awk -F '|' '{gsub(/ /, "", $0); print $2","$7 }')
+ jobVMs=$(bundle exec bosh vms --details| awk -F '|' '{gsub(/ /, "", $0); print $2","$7 }')
  deleteVMs
 fi
 
 if [ $1 == "shut" ]; then
- jobVMs=$(bosh instances --details| awk -F '|' '{gsub(/ /, "", $0); print $2","$7 }')
+ jobVMs=$(bundle exec bosh instances --details| awk -F '|' '{gsub(/ /, "", $0); print $2","$7 }')
  deleteVMs
 fi
 
 
 if [ $1 == "start" ]; then
- bosh -n deploy
- bosh vm resurrection on
+ bundle exec bosh -n deploy
+ bundle exec bosh vm resurrection on
 fi
 
