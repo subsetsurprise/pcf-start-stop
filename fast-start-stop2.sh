@@ -20,7 +20,7 @@ deleteVMs() {
         jobVMID=$(echo $jobVMID | awk -F ":" '{ print $2 }' | awk -F ";" '{ print $1 }')
      fi
      echo Killing: $x
-     echo "$COMMAND -d $current_deployment -n delete-vm $jobVMID 2>&1 >> dev/null &"
+     $COMMAND -d $current_deployment -n delete-vm $jobVMID 2>&1 >> /dev/null &
    done
 }
 
